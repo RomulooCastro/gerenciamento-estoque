@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
-import { useInventory } from '../context/InventoryContext';
-
-import { Edit, Trash2, Download } from 'lucide-react';
-import { exportToCSV } from '../utils/helpers';
+import { useInventory } from '../context/InventoryContext'; // Importando o contexto de inventário para acessar os produtos e a função de deletar produtos
+import { Edit, Trash2, Download } from 'lucide-react'; // Ícones para editar, excluir e exportar
+import { exportToCSV } from '../utils/helpers'; // Função para exportar os dados para CSV
 
 export const ProductList: React.FC = () => {
-  const { products, deleteProduct } = useInventory();
-  const [search, setSearch] = useState('');
-  const [category, setCategory] = useState('');
-  const [showLowStock, setShowLowStock] = useState(false);
+  const { products, deleteProduct } = useInventory(); // Obtendo produtos e a função de deletar produto do contexto
+  const [search, setSearch] = useState(''); // Estado para armazenar o valor da busca
+  const [category, setCategory] = useState(''); // Estado para armazenar a categoria selecionada
+  const [showLowStock, setShowLowStock] = useState(false); // Estado para controlar a exibição de produtos com estoque baixo
 
-  const categories = Array.from(new Set(products.map(p => p.category)));
+  const categories = Array.from(new Set(products.map(p => p.category))); // Gerando lista única de categorias a partir dos produtos
 
+  // Filtrando os produtos com base nos critérios de pesquisa, categoria e estoque baixo
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(search.toLowerCase()) ||
                          product.code.toLowerCase().includes(search.toLowerCase());
@@ -20,6 +20,7 @@ export const ProductList: React.FC = () => {
     return matchesSearch && matchesCategory && matchesLowStock;
   });
 
+  // Função para exportar os dados para um arquivo CSV
   const handleExport = () => {
     exportToCSV(products, 'produtos');
   };
@@ -37,22 +38,23 @@ export const ProductList: React.FC = () => {
         </button>
       </div>
 
+      {/* Filtros de busca, categoria e estoque baixo */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <input
           type="text"
           placeholder="Buscar produtos..."
           className="p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => setSearch(e.target.value)} // Atualizando o estado da busca
         />
         <select
           className="p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
           value={category}
-          onChange={(e) => setCategory(e.target.value)}
+          onChange={(e) => setCategory(e.target.value)} // Atualizando o estado da categoria selecionada
         >
           <option value="">Todas as categorias</option>
           {categories.map(cat => (
-            <option key={cat} value={cat}>{cat}</option>
+            <option key={cat} value={cat}>{cat}</option> // Gerando as opções de categoria
           ))}
         </select>
         <div className="flex items-center">
@@ -61,7 +63,7 @@ export const ProductList: React.FC = () => {
             id="lowStock"
             className="mr-2"
             checked={showLowStock}
-            onChange={(e) => setShowLowStock(e.target.checked)}
+            onChange={(e) => setShowLowStock(e.target.checked)} // Atualizando o estado para mostrar ou não produtos com estoque baixo
           />
           <label htmlFor="lowStock" className="text-gray-700 dark:text-gray-300">
             Mostrar apenas estoque baixo
@@ -69,6 +71,7 @@ export const ProductList: React.FC = () => {
         </div>
       </div>
 
+      {/* Tabela com a lista de produtos filtrados */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead className="bg-gray-50 dark:bg-gray-700">
@@ -120,13 +123,13 @@ export const ProductList: React.FC = () => {
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <button
                     className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 mr-3"
-                    onClick={() => {/* TODO: Implement edit */}}
+                    onClick={() => {/* TODO: Implement edit */}} // Ação de edição (pendente)
                   >
                     <Edit className="h-5 w-5" />
                   </button>
                   <button
                     className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
-                    onClick={() => deleteProduct(product.id)}
+                    onClick={() => deleteProduct(product.id)} // Chamando a função para deletar o produto
                   >
                     <Trash2 className="h-5 w-5" />
                   </button>

@@ -1,44 +1,55 @@
 import React from 'react';
+// Importação dos hooks e contextos para obter dados de inventário
 import { useInventory } from '../context/InventoryContext';
+// Importação de componentes de gráficos para exibição de dados
 import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Area, AreaChart } from 'recharts';
+// Importação dos ícones da biblioteca 'lucide-react' para adicionar ícones visuais
 import { Package, AlertTriangle, TrendingUp, TrendingDown, DollarSign, ShoppingCart } from 'lucide-react';
 
+// Componente principal 'Dashboard' 
 export const Dashboard: React.FC = () => {
+  // Obtém os dados do inventário e das movimentações a partir do contexto 'InventoryContext'
   const { products, movements } = useInventory();
 
+  // Função que calcula totais de compras, vendas e lucro
   const calculateFinancials = () => {
     const totalPurchases = movements
-      .filter(m => m.type === 'IN')
-      .reduce((acc, curr) => acc + curr.total, 0);
+      .filter(m => m.type === 'IN') // Filtra apenas as movimentações de entrada (compras)
+      .reduce((acc, curr) => acc + curr.total, 0); // Soma os totais das compras
     
     const totalSales = movements
-      .filter(m => m.type === 'OUT')
-      .reduce((acc, curr) => acc + curr.total, 0);
+      .filter(m => m.type === 'OUT') // Filtra apenas as movimentações de saída (vendas)
+      .reduce((acc, curr) => acc + curr.total, 0); // Soma os totais das vendas
     
     return {
       totalPurchases,
       totalSales,
-      profit: totalSales - totalPurchases
+      profit: totalSales - totalPurchases // Calcula o lucro (vendas - compras)
     };
   };
 
+  // Definindo as estatísticas principais do inventário
   const stats = {
-    totalProducts: products.length,
-    lowStockProducts: products.filter(p => p.quantity <= p.minQuantity).length,
-    totalQuantity: products.reduce((acc, curr) => acc + curr.quantity, 0),
-    ...calculateFinancials(),
-    recentMovements: movements.slice(-5).reverse(),
+    totalProducts: products.length, // Total de produtos
+    lowStockProducts: products.filter(p => p.quantity <= p.minQuantity).length, // Produtos com estoque crítico
+    totalQuantity: products.reduce((acc, curr) => acc + curr.quantity, 0), // Quantidade total de produtos
+    ...calculateFinancials(), // Calcula as finanças (compras, vendas e lucro)
+    recentMovements: movements.slice(-5).reverse(), // Últimas 5 movimentações
   };
 
+  // Função para gerar dados financeiros dos últimos 7 dias
   const getFinancialData = () => {
+    // Gera os últimos 7 dias
     const last7Days = Array.from({ length: 7 }, (_, i) => {
       const date = new Date();
-      date.setDate(date.getDate() - i);
-      return date.toISOString().split('T')[0];
-    }).reverse();
+      date.setDate(date.getDate() - i); // Define cada data para o intervalo de 7 dias
+      return date.toISOString().split('T')[0]; // Retorna a data no formato 'YYYY-MM-DD'
+    }).reverse(); // Reverte a ordem para exibir de forma cronológica
 
     return last7Days.map(date => {
+      // Filtra as movimentações do dia
       const dayMovements = movements.filter(m => m.date.startsWith(date));
+      // Calcula o total de vendas e compras para o dia
       const sales = dayMovements
         .filter(m => m.type === 'OUT')
         .reduce((acc, curr) => acc + curr.total, 0);
@@ -47,26 +58,29 @@ export const Dashboard: React.FC = () => {
         .reduce((acc, curr) => acc + curr.total, 0);
       
       return {
-        date: new Date(date).toLocaleDateString('pt-BR', { weekday: 'short' }),
-        vendas: sales,
-        compras: purchases,
-        lucro: sales - purchases
+        date: new Date(date).toLocaleDateString('pt-BR', { weekday: 'short' }), // Exibe a data formatada (ex: 'Seg')
+        vendas: sales, // Total de vendas
+        compras: purchases, // Total de compras
+        lucro: sales - purchases // Lucro do dia
       };
     });
   };
 
+  // Função para formatar valores financeiros em moeda brasileira
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL'
-    }).format(value);
+    }).format(value); // Formata o número como moeda brasileira (BRL)
   };
 
   return (
     <div className="p-6 space-y-6">
       <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Dashboard</h2>
       
+      {/* Bloco de informações gerais sobre o inventário */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        {/* Total de Produtos */}
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
           <div className="flex items-center justify-between">
             <div>
@@ -77,6 +91,7 @@ export const Dashboard: React.FC = () => {
           </div>
         </div>
 
+        {/* Produtos com Estoque Crítico */}
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
           <div className="flex items-center justify-between">
             <div>
@@ -87,6 +102,7 @@ export const Dashboard: React.FC = () => {
           </div>
         </div>
 
+        {/* Vendas Totais */}
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
           <div className="flex items-center justify-between">
             <div>
@@ -97,6 +113,7 @@ export const Dashboard: React.FC = () => {
           </div>
         </div>
 
+        {/* Lucro Total */}
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
           <div className="flex items-center justify-between">
             <div>
@@ -110,7 +127,9 @@ export const Dashboard: React.FC = () => {
         </div>
       </div>
 
+      {/* Gráfico de Desempenho Financeiro e Últimas Movimentações */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Gráfico de Desempenho Financeiro dos Últimos 7 dias */}
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
           <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">Desempenho Financeiro (7 dias)</h3>
           <div className="h-80">
@@ -130,7 +149,7 @@ export const Dashboard: React.FC = () => {
                 <XAxis dataKey="date" />
                 <YAxis />
                 <Tooltip 
-                  formatter={(value: number) => formatCurrency(value)}
+                  formatter={(value: number) => formatCurrency(value)} // Formata os valores no tooltip
                   contentStyle={{
                     backgroundColor: 'rgba(255, 255, 255, 0.9)',
                     border: 'none',
@@ -160,14 +179,17 @@ export const Dashboard: React.FC = () => {
           </div>
         </div>
 
+        {/* Últimas Movimentações */}
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
           <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">Últimas Movimentações</h3>
           <div className="space-y-4">
+            {/* Exibe as últimas movimentações realizadas */}
             {stats.recentMovements.map(movement => {
-              const product = products.find(p => p.id === movement.productId);
+              const product = products.find(p => p.id === movement.productId); // Encontra o produto relacionado à movimentação
               return (
                 <div key={movement.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                   <div className="flex items-center space-x-3">
+                    {/* Exibe ícone de venda ou compra dependendo do tipo */}
                     {movement.type === 'IN' ? (
                       <TrendingDown className="h-5 w-5 text-red-500" />
                     ) : (
@@ -175,17 +197,10 @@ export const Dashboard: React.FC = () => {
                     )}
                     <div>
                       <p className="font-medium text-gray-800 dark:text-white">{product?.name}</p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">{movement.description}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">{movement.date}</p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className={`font-medium ${movement.type === 'OUT' ? 'text-green-600' : 'text-red-600'}`}>
-                      {movement.type === 'OUT' ? '+' : '-'}{formatCurrency(movement.total)}
-                    </p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {new Date(movement.date).toLocaleDateString()}
-                    </p>
-                  </div>
+                  <div className="font-bold text-gray-800 dark:text-white">{formatCurrency(movement.total)}</div>
                 </div>
               );
             })}

@@ -1,22 +1,42 @@
+/*@tailwind base, @tailwind components, e @tailwind utilities: São as diretivas que importam os estilos base, componentes e utilitários do Tailwind CSS.
+
+@layer base: Define estilos globais ou básicos. No caso, está aplicando a propriedade antialiased para suavizar as fontes.
+
+@layer components: Define estilos para componentes específicos, como inputs, selects, textareas e buttons. Essas regras aplicam estilizações como bordas arredondadas, cores de borda e sombra para inputs e configura transições de cor para botões.*/
+
+/* Importa as diretivas do Tailwind CSS para adicionar estilos básicos, componentes e utilitários */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* Definição de estilos base para o corpo da página */
 @layer base {
   body {
+    /* Aplica o antialiasing para suavizar as fontes */
     @apply antialiased;
   }
 }
 
+/* Definição de estilos para componentes como inputs, selects, textareas e buttons */
 @layer components {
+  /* Estilos para inputs de texto, números, selects e textareas */
   input[type="text"],
   input[type="number"],
   select,
   textarea {
-    @apply rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white;
+    /* Aplica bordas arredondadas, borda de cor cinza claro, sombra sutil */
+    @apply rounded-lg border-gray-300 shadow-sm;
+    
+    /* Aplica a cor de foco da borda e do anel de foco para um tom de roxo */
+    @apply focus:border-indigo-500 focus:ring-indigo-500;
+    
+    /* Estilos para o tema escuro: fundo cinza escuro, borda cinza escuro e texto branco */
+    @apply dark:bg-gray-700 dark:border-gray-600 dark:text-white;
   }
 
+  /* Estilos para os botões */
   button {
+    /* Adiciona uma transição suave para as mudanças de cor ao longo de 200 milissegundos */
     @apply transition-colors duration-200;
   }
 }
